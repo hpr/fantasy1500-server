@@ -11,6 +11,7 @@ const mkHash = async (pw, salt) => new Promise((res) =>
 
 const body = JSON.parse(fs.readFileSync(0).toString() || '{}');
 
+console.log('access-control-allow-origin: *');
 console.log('content-type: application/json\n');
 
 let output = { status: 'failure' };
@@ -36,13 +37,12 @@ db.exec(`create table if not exists picks (
     case 'register': {
       const { email, name, password } = body;
       const salt = crypto.randomBytes(128).toString('base64');
-      db.prepare(`insert into users (email, name, salt, hash) values (?, ?, ?, ?)`).run(
-        email,
-        name,
-        salt,
-        await mkHash(password, salt),
-      );
-      output = { status: 'success' };
+      try {
+        db.prepare(`insert into users (email, name, salt, hash) values (?, ?, ?, ?)`).run(
+          email, name, salt, await mkHash(password, salt),
+        );
+        output = { status: 'success' };
+      } catch {}
       break;
     }
     case 'getPicks': {
