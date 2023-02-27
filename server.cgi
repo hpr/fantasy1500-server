@@ -49,8 +49,8 @@ db.exec(`create table if not exists picks (
       const  { email, password, meet } = body;
       const { id, salt, hash } = db.prepare('select * from users where email = ?').get(email);
       if (hash === await mkHash(password, salt)) {
-        const picks = db.prepare('select * from picks where userid = ? and meet = ?').get(id, meet);
-        output = JSON.parse(picks);
+        const { picksJson } = db.prepare('select * from picks where userid = ? and meet = ?').get(id, meet);
+        output = JSON.parse(picksJson);
       }
       break;
     }
